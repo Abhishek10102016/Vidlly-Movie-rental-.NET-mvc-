@@ -5,6 +5,7 @@ using System.Drawing.Printing;
 using System.Linq;
 using System.Web;
 using System.Web.Http;
+using System.Data.Entity;
 using System.Web.Mvc;
 using Vidlly.Dtos;
 using Vidlly.Models;
@@ -27,7 +28,7 @@ namespace Vidlly.Controllers.API
         //post /api/Movies
         public IEnumerable<MovieDto> GetMovies()
         {
-            return _context.Movies.ToList().Select(Mapper.Map<Movie, MovieDto>);
+            return _context.Movies.Include(m => m.Genre).ToList().Select(Mapper.Map<Movie, MovieDto>);
         }
         [HttpGet]
         public IHttpActionResult GetMovie(int id)
