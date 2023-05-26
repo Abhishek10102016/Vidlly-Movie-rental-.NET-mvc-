@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Ajax.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -19,11 +20,12 @@ namespace Vidlly.Controllers.API
         [HttpPost]
         public IHttpActionResult CreateNewRentals(NewRentalDto newRental)
         {
+            
             var customer = _context.Customers.Single(
                 c => c.id == newRental.CustomerId);
 
             var movies = _context.Movies.Where(
-                c => newRental.MovieId.Contains(c.Id)).ToList();
+                c => newRental.MovieIds.Contains(c.Id)).ToList();
 
             foreach(var movie in movies)
             {
@@ -42,7 +44,7 @@ namespace Vidlly.Controllers.API
             }
             _context.SaveChanges();
             return Ok();
-            throw new NotImplementedException();
+            
         }
     }
 }

@@ -37,7 +37,7 @@ namespace Vidlly.Controllers.API
             if (!String.IsNullOrWhiteSpace(query))
                 moviesQuery = moviesQuery.Where(m => m.Name.Contains(query));
 
-            return moviesQuery.Include(m => m.Genre).ToList().Select(Mapper.Map<Movie, MovieDto>);
+            return moviesQuery.ToList().Select(Mapper.Map<Movie, MovieDto>);
         }
         [HttpGet]
         [System.Web.Http.Authorize(Roles = "CanManageMovies")]
