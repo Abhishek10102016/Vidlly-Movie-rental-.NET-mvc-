@@ -13,6 +13,8 @@ using HttpDeleteAttribute = System.Web.Mvc.HttpDeleteAttribute;
 using HttpGetAttribute = System.Web.Mvc.HttpGetAttribute;
 using HttpPostAttribute = System.Web.Mvc.HttpPostAttribute;
 using HttpPutAttribute = System.Web.Mvc.HttpPutAttribute;
+using System.Web.Security;
+using AuthorizeAttribute = System.Web.Http.AuthorizeAttribute;
 
 namespace Vidlly.Controllers.API
 {
@@ -26,11 +28,19 @@ namespace Vidlly.Controllers.API
         }
 
         //post /api/Movies
-        public IEnumerable<MovieDto> GetMovies()
+        public IEnumerable<MovieDto> GetMovies(string query = null)
         {
-            return _context.Movies.Include(m => m.Genre).ToList().Select(Mapper.Map<Movie, MovieDto>);
+            var moviesQuery = _context.Movies
+                 .Include(m => m.Genre)
+                 .Where(m => m.NumberAvailable > 0);
+
+            if (!String.IsNullOrWhiteSpace(query))
+                moviesQuery = moviesQuery.Where(m => m.Name.Contains(query));
+
+            return moviesQuery.Include(m => m.Genre).ToList().Select(Mapper.Map<Movie, MovieDto>);
         }
         [HttpGet]
+        [System.Web.Http.Authorize(Roles = "CanManageMovies")]
         public IHttpActionResult GetMovie(int id)
         {
             var movie = _context.Movies.SingleOrDefault(x => x.Id == id);
@@ -42,6 +52,7 @@ namespace Vidlly.Controllers.API
             return Ok(movieDto);
         }
         [HttpPost]
+        [Authorize(Roles = "CanManageMovies")]
         public IHttpActionResult CreateMovie(MovieDto movieDto)
         {
             if(!ModelState.IsValid)
@@ -55,6 +66,7 @@ namespace Vidlly.Controllers.API
             return Created(new Uri(Request.RequestUri + "/" + movie.Id), movieDto);
         }
         [HttpPut]
+        [Authorize(Roles = "CanManageMovies")]
         public IHttpActionResult UpdateMovie(int id, MovieDto movieDto)
         {
             if (!ModelState.IsValid)
@@ -71,6 +83,7 @@ namespace Vidlly.Controllers.API
             return Ok();
         }
         [HttpDelete]
+        [Authorize(Roles = RoleName.CanManageMovies)]
         public IHttpActionResult DeleteMovie(int id)
         {
             var movieInDb = _context.Movies.SingleOrDefault(c => c.Id == id);
